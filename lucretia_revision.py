@@ -65,7 +65,7 @@ while hours_in_day == 24:
         #the spin function should be written so that evertying moves from digit
         #to digit and stops and attempts to place the call once the phone is
         #picked up
-    elif (pin3 == 0) and (pin1 == 1):
+    if (pin3 == 0) and (pin1 == 1):
         while (pin1 == 0):
             first_digit =str (spin())
             second_digit  = str( spin())
