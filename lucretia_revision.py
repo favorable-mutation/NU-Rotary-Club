@@ -3,15 +3,20 @@
 
 #Revisions by Lucretia 08/23/17 Notes:
     # - line 51 not correct syntax, I am uncertain what should be though
-    # - lines 13 and 14 have standin pin numbers so that the code can run past them
+    # - lines 13 and 14 have standin pin numbers so that the code can run past them #resolved
 
 #this brings in the library we need to use the pins on the board
 import RPi.GPIO as GPIO
+import serial
+import os, time
+
 GPIO.setmode(GPIO.BOARD)
 
+port=serial.Serial("/dev/ttyAmA0", baudrate=9600, timeout=1)
+
 #set our pins to input or output
-GPIO.setup(1, GPIO.OUT) # standin pins so that no error is flagged
-GPIO.setup(2, GPIO.IN)
+GPIO.setup(6, GPIO.OUT) # standin pins so that no error is flagged
+GPIO.setup([1,2,2,4], GPIO.IN)
 
 #this is the function that each spin of the dial will use to determine what
 #that digit will be it is called repedidly if making a outgoing call
@@ -50,16 +55,19 @@ while hours_in_day == 24:
         while (pin1 == 1) and (pin2 == 1):
             pin1 = GPIO.input(1)
             pin2 = GPIO.input(2)
-#            write pin 6 to 1    # wring the phone (NOT PROPER SYNTAX, need to figure out correct)
+            GPIO.output(6,HIGH)    #wring the phone
 
             #if while the phone is ringing the phone is picked up then tell the
             #GSM card to connect
         while(pin1 == 0):
-            serialport.write("ATA")      #awnser the phone
+            GPIO.output(6,LOW)
+            serialport.write("ATA" + ';\r')      #awnser the phone
             pin1 = GPIO.input(1)
             if pin1 == 1:
-                serialport.write("ATH")
+                serialport.write("ATH" + ';\r')   #end call
 
+
+    GPIO.output(6,LOW)
 
         # if bottom limit switch pressed and phone hung up start dial loop
         #the spin function should be written so that evertying moves from digit
@@ -76,7 +84,7 @@ while hours_in_day == 24:
             sixth_digit = str(spin())
             seventh_digit = str(spin())
             eight_digit =str( spin())
-            ninth_digit =str() spin())
+            ninth_digit =str( spin())
             tenth_digit = str(spin())
             eleventh_digit = str(spin())
             twelth_digit = str(spin())
@@ -94,8 +102,8 @@ while hours_in_day == 24:
             phone_number = (first_digit + second_digit + third_digit + forth_digit + fifth_digit + sixth_digit + seventh_digit)
 
 #dial the number and shut the rest of the code up in a loop unitl hang up
-        serialport.write("ATD" + phone_number + ';\r')
+        serialport.write("ATD" + phone_number + ';\r') #start call
         while pin1 == 0:
             pin1 = GPIO.input(1)
             if pin1 == 1:
-                serialport.write("ATH")
+                serialport.write("ATH" + ';\r') #end call
